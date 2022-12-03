@@ -1,20 +1,18 @@
 <template>
     <div class="relative">
         <div class="controls absolute p-3 flex flex-col gap-2">
-            <button
-                class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
-                @click="toggle()"
-            >
+            <button class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
+                @click="toggle()">
                 {{ video?.paused ? 'Play' : 'Pause' }}
             </button>
-            <button
-                class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
-                @click="transparency = !transparency"
-            >Transparency {{ transparency ? 'Off' : 'On' }}</button>
-            <button
-                class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
-                @click="negative = !negative"
-            >Negative {{ negative ? 'Off' : 'On' }}</button>
+            <button class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
+                @click="video.pause(); video.currentTime = 0; video.play()">
+                Reset
+            </button>
+            <button class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
+                @click="transparency = !transparency">Transparency {{ transparency ? 'Off' : 'On' }}</button>
+            <button class="rounded-md bg-blue-500 hover:bg-blue-600 transition duration-200 p-2 flex-none"
+                @click="negative = !negative">Negative {{ negative ? 'Off' : 'On' }}</button>
             <label for="volume">Volume - {{ volume }}</label>
             <input type="range" name="volume" min="0" max="0.5" step="0.025" v-model="volume">
             <div class="flex flex-row gap-2 items-center">
@@ -23,31 +21,33 @@
             </div>
             <div v-if="textMode">
                 <div class="flex flex-row gap-2">
-                    <input class="rounded-md p-2 bg-gray-700 inline w-10" type="text" v-model="filledChar" name="filledChar" id="filledChar">
-                    <input class="rounded-md p-2 bg-gray-700 inline w-10" type="text" v-model="emptyChar" name="emptyChar" id="emptyChar">
+                    <input class="rounded-md p-2 bg-gray-700 inline w-10" type="text" v-model="filledChar"
+                        name="filledChar" id="filledChar">
+                    <input class="rounded-md p-2 bg-gray-700 inline w-10" type="text" v-model="emptyChar"
+                        name="emptyChar" id="emptyChar">
+                </div>
+                <div class="flex flex-row gap-2 items-center mt-2">
+                    <input class="w-5 h-5" type="checkbox" name="textSpacing" id="textSpacing" v-model="textSpacing">
+                    <label for="textSpacing">Text Spacing</label>
+                </div>
+                <div class="flex flex-row gap-2 items-center mt-2">
+                    <input class="w-5 h-5" type="color" name="textColor" id="textColor" v-model="textColor">
+                    <label for="textColor">Text Color</label>
                 </div>
             </div>
         </div>
         <div v-if="(arr[0].length > 0)" class="flex flex-col items-center justify-center h-screen">
             <div v-if="!textMode" class="flex flex-row leading-none" v-for="(i1, k1) in sizeH" :key="k1">
-                <input
-                    v-for="(i2, k2) in sizeW"
-                    :key="k2"
-                    class="w-4 h-4"
+                <input v-for="(i2, k2) in sizeW" :key="k2" class="w-4 h-4"
                     :class="{ 'invisible': (negative ? (arr[k1][k2]) : (!arr[k1][k2])) && transparency }"
-                    type="checkbox"
-                    :checked="!negative ? (arr[k1][k2]) : (!arr[k1][k2])"
-                >
+                    type="checkbox" :checked="!negative ? (arr[k1][k2]) : (!arr[k1][k2])">
             </div>
             <div v-else class="flex flex-row leading-none" v-for="(i1, k1) in sizeH" :key="k1 + 1000">
-                <span
-                    v-for="(i2, k2) in sizeW"
-                    :key="k2"
-                    class="font-mono mr-2 text-green-400"
-                    :class="{ 'invisible': (negative ? (arr[k1][k2]) : (!arr[k1][k2])) && transparency }"
-                    type="checkbox"
-                    :checked="!negative ? (arr[k1][k2]) : (!arr[k1][k2])"
-                >{{ (!negative ? (arr[k1][k2]) : (!arr[k1][k2])) ? filledChar : emptyChar }}</span>
+                <span v-for="(i2, k2) in sizeW" :key="k2" class="font-mono" :style="`color: ${textColor}`"
+                    :class="{ 'invisible': (negative ? (arr[k1][k2]) : (!arr[k1][k2])) && transparency, 'mr-1.5': textSpacing }"
+                    type="checkbox" :checked="!negative ? (arr[k1][k2]) : (!arr[k1][k2])">{{ (!negative ? (arr[k1][k2])
+                            : (!arr[k1][k2])) ? filledChar : emptyChar
+                    }}</span>
             </div>
         </div>
         <video class="hidden" ref="video" controls src="/bad_apple.webm" :volume="volume"></video>
@@ -65,10 +65,12 @@ let canvas = $ref();
 let video = $ref();
 let transparency = $ref(false);
 let negative = $ref(false);
-let volume = $ref(0);
+let volume = $ref(0.025);
 let textMode = $ref(false);
 let filledChar = $ref('1');
 let emptyChar = $ref('0');
+let textSpacing = $ref(false);
+let textColor = $ref("#35FF03");
 
 
 // We have to do this terribleness, because
@@ -78,7 +80,7 @@ let emptyChar = $ref('0');
 let arr = $ref([])
 for (let i = 0; i < sizeH; i++) {
     arr.push(new Array(sizeW).fill(false))
-} 
+}
 
 function toggle() {
     if (video.paused) {
