@@ -67,8 +67,8 @@ let transparency = $ref(false);
 let negative = $ref(false);
 let volume = $ref(0.025);
 let textMode = $ref(false);
-let filledChar = $ref('1');
-let emptyChar = $ref('0');
+let filledChar = $ref('@');
+let emptyChar = $ref('-');
 let textSpacing = $ref(false);
 let textColor = $ref("#35FF03");
 
